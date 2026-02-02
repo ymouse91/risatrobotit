@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>DriftingDroids – HTML/JS</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" sizes="192x192" href="./icon192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./icon192.png">
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title">DriftingDroids (HTML/JS)</div>
+    <div class="controls">
+      <button id="buildBtn" class="btn">Build-tila</button>
+      <button id="startPlayBtn" class="btn">Aloita peli</button>
+      <button id="newBtn" class="btn">Uusi lauta</button>
+      <button id="resetBtn" class="btn">Alkuasetelma</button>
+      <button id="solveBtn" class="btn">Etsi ratkaisu</button>
+      <label class="pill">Syvyys
+        <input id="depthInp" type="number" min="1" max="25" value="12"/>
+      </label>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <canvas id="cv" width="640" height="640"></canvas>
+
+    <aside class="side">
+      <div id="buildPanel" class="card" style="display:none;">
+        <div class="h">Build-tila</div>
+
+        <div class="subh">Kvadrantit (oltava 1/2/3/4)</div>
+        <div class="grid4">
+          <label>NW <select id="qNW"></select></label>
+          <label>NE <select id="qNE"></select></label>
+		  <label>SW <select id="qSW"></select></label>
+          <label>SE <select id="qSE"></select></label>
+
+        </div>
+        <div class="rowBtns">
+          <button id="applyQuadrantsBtn" class="btn">Aseta kvadrantit</button>
+        </div>
+
+        <div class="subh">Robotti, jota asetetaan klikkauksella</div>
+        <div id="robotPick" class="robotPick"></div>
+        <div class="small">Klikkaa laudalta ruutu: valittu robotti siirtyy siihen (build-tilassa).</div>
+
+        <div class="subh">Tavoite</div>
+        <label class="wide">Valitse tavoite:
+          <select id="goalSel"></select>
+        </label>
+
+        <div class="small">Kun painat <b>Aloita peli</b>, tämä asetelma tallennetaan alkuasetelmaksi (robotit + tavoite).</div>
+      </div>
+
+      <div class="card">
+        <div class="h">Ohje</div>
+        <ul>
+          <li>Klikkaa robottia → valitse.</li>
+          <li>Liikuta nuolinäppäimillä tai painikkeilla.</li>
+          <li>Build-tilassa klikkaus laudalla asettaa valitun robotin.</li>
+        </ul>
+        <div class="moveBtns">
+          <button class="btn" data-dir="N">↑</button>
+          <div class="row">
+            <button class="btn" data-dir="W">←</button>
+            <button class="btn" data-dir="S">↓</button>
+            <button class="btn" data-dir="E">→</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="h">Tila</div>
+        <div id="status" class="status">Valmis.</div>
+        <div class="small" id="goalInfo"></div>
+        <div class="small" id="selInfo"></div>
+      </div>
+
+      <div class="card">
+        <div class="h">Ratkaisu</div>
+        <ol id="solList" class="sol"></ol>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
