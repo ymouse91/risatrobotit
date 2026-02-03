@@ -7,7 +7,7 @@ html,body{height:100%;margin:0;background:#0b1220;color:#e9eef7;font-family:syst
 .pill{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 10px;font-weight:700}
 .pill input{width:64px;background:transparent;color:#e9eef7;border:none;outline:none;font-weight:800}
 .wrap{display:grid;grid-template-columns:minmax(320px, 640px) minmax(260px, 420px);gap:12px;padding:12px;align-items:start}
-#cv{width:min(92vw,640px);height:auto;aspect-ratio:1/1;border-radius:16px;background:#0e1730;border:1px solid rgba(255,255,255,.14);touch-action:none}
+#cv{width:min(92vw,620px);height:auto;aspect-ratio:1/1;border-radius:16px;background:#0e1730;border:1px solid rgba(255,255,255,.14);touch-action:none}
 .side{display:flex;flex-direction:column;gap:12px}
 .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px}
 .h{font-weight:900;margin-bottom:8px}

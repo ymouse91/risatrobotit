@@ -288,6 +288,8 @@ function isOppositeDir(a,b){
   return (a==="N"&&b==="S")||(a==="S"&&b==="N")||(a==="E"&&b==="W")||(a==="W"&&b==="E");
 }
 
+
+
 function resetMoveHistory(){
   totalMoves = 0;
   lastDir = Array(board.robots.length).fill(null);
@@ -758,7 +760,9 @@ function doMove(dir){
   draw();
 
   if(board.isSolved()){
+	solList.innerHTML = ""; // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
     setStatus("✅ Maali saavutettu! Uusi kohde arvottu.");
+
     pickNewGoalAvoidRepeats();
 
     // Prepare capturing a new start position for the next goal, but do NOT commit yet.
