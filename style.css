@@ -26,3 +26,66 @@ select{background:#0e1730;color:#e9eef7;border:1px solid rgba(255,255,255,.18);b
 .dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.55)}
 .rowBtns{display:flex;gap:8px;margin-top:10px}
 @media (max-width: 980px){ .wrap{grid-template-columns:1fr} }
+/* iPhone (portrait): otsikko omalle riville + napit yhteen riviin,
+   piilota build/ratkaisu/syvyys + ohje + ratkaisulista (pelkkä CSS) */
+@media (max-width: 430px) and (orientation: portrait) and (hover: none) and (pointer: coarse){
+
+  /* Topbar kahteen riviin: title ylös, controls alle yhteen riviin */
+  .topbar{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 10px;
+  }
+
+  .title{
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  /* Kontrolit: yksi rivi, ei wrap */
+  .controls{
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow-x: auto;              /* jos ihan pakko, rullaa vaakaan */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .controls::-webkit-scrollbar{ display:none; }
+
+  /* Napit tiiviimmiksi jotta mahtuvat */
+  .btn{
+    padding: 7px 9px;
+    border-radius: 10px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* Piilota: Build-tila, Etsi ratkaisu, Syvyys (label+pilleri) */
+  #buildBtn{ display:none !important; }
+  #solveBtn{ display:none !important; }
+  .pill{ display:none !important; }   /* sisältää Syvyys + input */
+
+  /* Piilota oikeasta laidasta Ohje-kortti kokonaan.
+     HUOM: Tämä olettaa nykyisen HTML-järjestyksen:
+     1) buildPanel (piilossa), 2) Ohje, 3) Tila, 4) Ratkaisu */
+  .side > .card:nth-of-type(2){ display:none !important; }
+
+  /* Piilota Ratkaisu-kortti (ja samalla “tulostus”) */
+  .side > .card:nth-of-type(4){ display:none !important; }
+
+  /* Kun ohje/ratkaisu on piilossa, anna canvasille enemmän leveyttä */
+  .wrap{
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  #cv{
+    width: min(96vw, 620px);
+  }
+}
+
