@@ -89,3 +89,29 @@ select{background:#0e1730;color:#e9eef7;border:1px solid rgba(255,255,255,.18);b
   }
 }
 
+@media (max-width: 430px) and (orientation: portrait) and (hover: none) and (pointer: coarse){
+
+  /* Estä koko sivun kuminauha */
+  html, body{
+    height: 100%;
+    overflow: hidden;                 /* ei pystyscrollia */
+    overscroll-behavior: none;        /* estää bounce */
+  }
+
+  /* Varmista että app täyttää ruudun eikä veny */
+  #app{
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Estä vaakasuuntainen “nykäisy” */
+  body{
+    position: fixed;                  /* lukitsee näkymän */
+    width: 100%;
+  }
+
+  /* Estä myös sisäisten alueiden overscroll */
+  .wrap, .controls, .side{
+    overscroll-behavior: contain;
+  }
+}
