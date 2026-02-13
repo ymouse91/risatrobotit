@@ -19,6 +19,8 @@ const DXY = [
 const ROBOT_COLORS = ["#ff4d4d","#2ee88f","#4db8ff","#ffd84d","#c9d2dc"]; // r,g,b,y,s
 const ROBOT_NAMES = ["Punainen","Vihreä","Sininen","Keltainen","Harmaa"];
 const DIR_ARROW = {N:"↑",E:"→",S:"↓",W:"←"};
+let moveCount = 0;
+
 
 function randInt(n){ return (Math.random()*n)|0; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=randInt(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -756,13 +758,15 @@ function doMove(dir){
   }
 
   updateMoveHistory(selectedRobot, dir);
-  setStatus("Siirretty.");
+  moveCount++;
+  setStatus("Siirto " + moveCount +".");
   draw();
 
   if(board.isSolved()){
 	solList.innerHTML = ""; // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
-    setStatus("✅ Maali saavutettu! Uusi kohde arvottu.");
 
+    setStatus("✅ Ratkaistu " + moveCount+ " siirrolla. Uusi kohde arvottu.");
+	moveCount = 0;
     pickNewGoalAvoidRepeats();
 
     // Prepare capturing a new start position for the next goal, but do NOT commit yet.
