@@ -4,7 +4,7 @@
    Kvadranttidata on poimittu Board.java:sta (DriftingDroids 1.3.10).
 */
 
-const QUADS = [[["wall", 1, 0, "E"], ["wall", 4, 1, "NW"], ["goal", 4, 1, 0, "circle"], ["wall", 1, 2, "NE"], ["goal", 1, 2, 1, "triangle"], ["wall", 6, 3, "SE"], ["goal", 6, 3, 3, "star"], ["wall", 0, 5, "S"], ["wall", 3, 6, "SW"], ["goal", 3, 6, 2, "square"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 5, 1, "SE"], ["goal", 5, 1, 1, "star"], ["wall", 1, 2, "SW"], ["goal", 1, 2, 0, "square"], ["wall", 0, 3, "S"], ["wall", 6, 4, "NW"], ["goal", 6, 4, 3, "circle"], ["wall", 2, 6, "NE"], ["goal", 2, 6, 2, "triangle"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 5, 2, "SE"], ["goal", 5, 2, 2, "star"], ["wall", 0, 4, "S"], ["wall", 2, 4, "NE"], ["goal", 2, 4, 1, "circle"], ["wall", 7, 5, "SW"], ["goal", 7, 5, 0, "triangle"], ["wall", 1, 6, "NW"], ["goal", 1, 6, 3, "square"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 6, 1, "SW"], ["goal", 6, 1, 2, "circle"], ["wall", 1, 3, "NE"], ["goal", 1, 3, 3, "triangle"], ["wall", 5, 4, "NW"], ["goal", 5, 4, 1, "square"], ["wall", 2, 5, "SE"], ["goal", 2, 5, 0, "star"], ["wall", 7, 5, "SE"], ["goal", 7, 5, -1, "vortex"], ["wall", 0, 6, "S"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 6, 1, "SE"], ["goal", 6, 1, 3, "star"], ["wall", 1, 2, "NW"], ["goal", 1, 2, 1, "triangle"], ["wall", 0, 5, "S"], ["wall", 6, 5, "NE"], ["goal", 6, 5, 2, "square"], ["wall", 3, 6, "SW"], ["goal", 3, 6, 0, "circle"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 2, 1, "NW"], ["goal", 2, 1, 3, "circle"], ["wall", 6, 3, "SW"], ["goal", 6, 3, 2, "triangle"], ["wall", 0, 4, "S"], ["wall", 4, 5, "NE"], ["goal", 4, 5, 0, "square"], ["wall", 1, 6, "SE"], ["goal", 1, 6, 1, "star"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 1, 1, "SW"], ["goal", 1, 1, 0, "triangle"], ["wall", 6, 2, "NE"], ["goal", 6, 2, 1, "circle"], ["wall", 2, 4, "SE"], ["goal", 2, 4, 2, "star"], ["wall", 0, 5, "S"], ["wall", 7, 5, "NW"], ["goal", 7, 5, 3, "square"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 2, 1, "SE"], ["goal", 2, 1, 0, "star"], ["wall", 1, 3, "SW"], ["goal", 1, 3, 1, "square"], ["wall", 0, 4, "S"], ["wall", 6, 4, "NW"], ["goal", 6, 4, 3, "triangle"], ["wall", 5, 6, "NE"], ["goal", 5, 6, 2, "circle"], ["wall", 3, 7, "SE"], ["goal", 3, 7, -1, "vortex"], ["wall", 7, 7, "NESW"]], [["wall", 1, 0, "E"], ["wall", 3, 1, "NW"], ["goal", 3, 1, 1, "triangle"], ["wall", 6, 3, "SE"], ["goal", 6, 3, 3, "star"], ["wall", 1, 4, "SW"], ["goal", 1, 4, 0, "circle"], ["wall", 0, 6, "S"], ["wall", 4, 6, "NE"], ["goal", 4, 6, 2, "square"], ["wall", 7, 7, "NESW"]], [["wall", 5, 0, "E"], ["wall", 3, 2, "NW"], ["goal", 3, 2, 3, "circle"], ["wall", 0, 3, "S"], ["wall", 5, 3, "SW"], ["goal", 5, 3, 2, "triangle"], ["wall", 2, 4, "NE"], ["goal", 2, 4, 0, "square"], ["wall", 4, 5, "SE"], ["goal", 4, 5, 1, "star"], ["wall", 7, 7, "NESW"]], [["wall", 1, 0, "E"], ["wall", 4, 1, "NE"], ["goal", 4, 1, 1, "circle"], ["wall", 1, 3, "SW"], ["goal", 1, 3, 0, "triangle"], ["wall", 0, 5, "S"], ["wall", 5, 5, "NW"], ["goal", 5, 5, 3, "square"], ["wall", 3, 6, "SE"], ["goal", 3, 6, 2, "star"], ["wall", 7, 7, "NESW"]], [["wall", 2, 0, "E"], ["wall", 5, 1, "SW"], ["goal", 5, 1, 2, "circle"], ["wall", 7, 2, "SE"], ["goal", 7, 2, -1, "vortex"], ["wall", 0, 3, "S"], ["wall", 3, 4, "SE"], ["goal", 3, 4, 0, "star"], ["wall", 6, 5, "NW"], ["goal", 6, 5, 1, "square"], ["wall", 1, 6, "NE"], ["goal", 1, 6, 3, "triangle"], ["wall", 7, 7, "NESW"]], [["wall", 5, 0, "E"], ["wall", 1, 3, "NW"], ["goal", 1, 3, 0, "circle"], ["wall", 6, 4, "SE"], ["goal", 6, 4, 3, "star"], ["wall", 0, 5, "S"], ["wall", 2, 6, "NE"], ["goal", 2, 6, 1, "triangle"], ["wall", 3, 6, "SW"], ["goal", 3, 6, 2, "square"], ["wall", 7, 7, "NESW"]], [["wall", 2, 0, "E"], ["wall", 5, 2, "SE"], ["goal", 5, 2, 1, "star"], ["wall", 6, 2, "NW"], ["goal", 6, 2, 3, "circle"], ["wall", 1, 5, "SW"], ["goal", 1, 5, 0, "square"], ["wall", 0, 6, "S"], ["wall", 4, 7, "NE"], ["goal", 4, 7, 2, "triangle"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 0, 2, "S"], ["wall", 6, 2, "SE"], ["goal", 6, 2, 2, "star"], ["wall", 2, 4, "NE"], ["goal", 2, 4, 1, "circle"], ["wall", 3, 4, "SW"], ["goal", 3, 4, 0, "triangle"], ["wall", 5, 6, "NW"], ["goal", 5, 6, 3, "square"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 6, 2, "NW"], ["goal", 6, 2, 3, "triangle"], ["wall", 2, 3, "NE"], ["goal", 2, 3, 2, "circle"], ["wall", 3, 3, "SW"], ["goal", 3, 3, 1, "square"], ["wall", 1, 5, "SE"], ["goal", 1, 5, 0, "star"], ["wall", 0, 6, "S"], ["wall", 5, 7, "SE"], ["goal", 5, 7, -1, "vortex"], ["wall", 7, 7, "NESW"]]];
+const QUADS = [[["wall", 1, 0, "E"], ["wall", 4, 1, "NW"], ["goal", 4, 1, 0, "Ympyrä"], ["wall", 1, 2, "NE"], ["goal", 1, 2, 1, "Kolmio"], ["wall", 6, 3, "SE"], ["goal", 6, 3, 3, "Tähti"], ["wall", 0, 5, "S"], ["wall", 3, 6, "SW"], ["goal", 3, 6, 2, "Neliö"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 5, 1, "SE"], ["goal", 5, 1, 1, "Tähti"], ["wall", 1, 2, "SW"], ["goal", 1, 2, 0, "Neliö"], ["wall", 0, 3, "S"], ["wall", 6, 4, "NW"], ["goal", 6, 4, 3, "Ympyrä"], ["wall", 2, 6, "NE"], ["goal", 2, 6, 2, "Kolmio"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 5, 2, "SE"], ["goal", 5, 2, 2, "Tähti"], ["wall", 0, 4, "S"], ["wall", 2, 4, "NE"], ["goal", 2, 4, 1, "Ympyrä"], ["wall", 7, 5, "SW"], ["goal", 7, 5, 0, "Kolmio"], ["wall", 1, 6, "NW"], ["goal", 1, 6, 3, "Neliö"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 6, 1, "SW"], ["goal", 6, 1, 2, "Ympyrä"], ["wall", 1, 3, "NE"], ["goal", 1, 3, 3, "Kolmio"], ["wall", 5, 4, "NW"], ["goal", 5, 4, 1, "Neliö"], ["wall", 2, 5, "SE"], ["goal", 2, 5, 0, "Tähti"], ["wall", 7, 5, "SE"], ["goal", 7, 5, -1, "Vortex"], ["wall", 0, 6, "S"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 6, 1, "SE"], ["goal", 6, 1, 3, "Tähti"], ["wall", 1, 2, "NW"], ["goal", 1, 2, 1, "Kolmio"], ["wall", 0, 5, "S"], ["wall", 6, 5, "NE"], ["goal", 6, 5, 2, "Neliö"], ["wall", 3, 6, "SW"], ["goal", 3, 6, 0, "Ympyrä"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 2, 1, "NW"], ["goal", 2, 1, 3, "Ympyrä"], ["wall", 6, 3, "SW"], ["goal", 6, 3, 2, "Kolmio"], ["wall", 0, 4, "S"], ["wall", 4, 5, "NE"], ["goal", 4, 5, 0, "Neliö"], ["wall", 1, 6, "SE"], ["goal", 1, 6, 1, "Tähti"], ["wall", 7, 7, "NESW"]], [["wall", 3, 0, "E"], ["wall", 1, 1, "SW"], ["goal", 1, 1, 0, "Kolmio"], ["wall", 6, 2, "NE"], ["goal", 6, 2, 1, "Ympyrä"], ["wall", 2, 4, "SE"], ["goal", 2, 4, 2, "Tähti"], ["wall", 0, 5, "S"], ["wall", 7, 5, "NW"], ["goal", 7, 5, 3, "Neliö"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 2, 1, "SE"], ["goal", 2, 1, 0, "Tähti"], ["wall", 1, 3, "SW"], ["goal", 1, 3, 1, "Neliö"], ["wall", 0, 4, "S"], ["wall", 6, 4, "NW"], ["goal", 6, 4, 3, "Kolmio"], ["wall", 5, 6, "NE"], ["goal", 5, 6, 2, "Ympyrä"], ["wall", 3, 7, "SE"], ["goal", 3, 7, -1, "Vortex"], ["wall", 7, 7, "NESW"]], [["wall", 1, 0, "E"], ["wall", 3, 1, "NW"], ["goal", 3, 1, 1, "Kolmio"], ["wall", 6, 3, "SE"], ["goal", 6, 3, 3, "Tähti"], ["wall", 1, 4, "SW"], ["goal", 1, 4, 0, "Ympyrä"], ["wall", 0, 6, "S"], ["wall", 4, 6, "NE"], ["goal", 4, 6, 2, "Neliö"], ["wall", 7, 7, "NESW"]], [["wall", 5, 0, "E"], ["wall", 3, 2, "NW"], ["goal", 3, 2, 3, "Ympyrä"], ["wall", 0, 3, "S"], ["wall", 5, 3, "SW"], ["goal", 5, 3, 2, "Kolmio"], ["wall", 2, 4, "NE"], ["goal", 2, 4, 0, "Neliö"], ["wall", 4, 5, "SE"], ["goal", 4, 5, 1, "Tähti"], ["wall", 7, 7, "NESW"]], [["wall", 1, 0, "E"], ["wall", 4, 1, "NE"], ["goal", 4, 1, 1, "Ympyrä"], ["wall", 1, 3, "SW"], ["goal", 1, 3, 0, "Kolmio"], ["wall", 0, 5, "S"], ["wall", 5, 5, "NW"], ["goal", 5, 5, 3, "Neliö"], ["wall", 3, 6, "SE"], ["goal", 3, 6, 2, "Tähti"], ["wall", 7, 7, "NESW"]], [["wall", 2, 0, "E"], ["wall", 5, 1, "SW"], ["goal", 5, 1, 2, "Ympyrä"], ["wall", 7, 2, "SE"], ["goal", 7, 2, -1, "Vortex"], ["wall", 0, 3, "S"], ["wall", 3, 4, "SE"], ["goal", 3, 4, 0, "Tähti"], ["wall", 6, 5, "NW"], ["goal", 6, 5, 1, "Neliö"], ["wall", 1, 6, "NE"], ["goal", 1, 6, 3, "Kolmio"], ["wall", 7, 7, "NESW"]], [["wall", 5, 0, "E"], ["wall", 1, 3, "NW"], ["goal", 1, 3, 0, "Ympyrä"], ["wall", 6, 4, "SE"], ["goal", 6, 4, 3, "Tähti"], ["wall", 0, 5, "S"], ["wall", 2, 6, "NE"], ["goal", 2, 6, 1, "Kolmio"], ["wall", 3, 6, "SW"], ["goal", 3, 6, 2, "Neliö"], ["wall", 7, 7, "NESW"]], [["wall", 2, 0, "E"], ["wall", 5, 2, "SE"], ["goal", 5, 2, 1, "Tähti"], ["wall", 6, 2, "NW"], ["goal", 6, 2, 3, "Ympyrä"], ["wall", 1, 5, "SW"], ["goal", 1, 5, 0, "Neliö"], ["wall", 0, 6, "S"], ["wall", 4, 7, "NE"], ["goal", 4, 7, 2, "Kolmio"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 0, 2, "S"], ["wall", 6, 2, "SE"], ["goal", 6, 2, 2, "Tähti"], ["wall", 2, 4, "NE"], ["goal", 2, 4, 1, "Ympyrä"], ["wall", 3, 4, "SW"], ["goal", 3, 4, 0, "Kolmio"], ["wall", 5, 6, "NW"], ["goal", 5, 6, 3, "Neliö"], ["wall", 7, 7, "NESW"]], [["wall", 4, 0, "E"], ["wall", 6, 2, "NW"], ["goal", 6, 2, 3, "Kolmio"], ["wall", 2, 3, "NE"], ["goal", 2, 3, 2, "Ympyrä"], ["wall", 3, 3, "SW"], ["goal", 3, 3, 1, "Neliö"], ["wall", 1, 5, "SE"], ["goal", 1, 5, 0, "Tähti"], ["wall", 0, 6, "S"], ["wall", 5, 7, "SE"], ["goal", 5, 7, -1, "Vortex"], ["wall", 7, 7, "NESW"]]];
 
 // --- Utility ---
 const DIRS = ["N","E","S","W"];
@@ -360,9 +360,21 @@ function goalReachableInOneMove(g){
 }								   
 function pickNewGoalAvoidRepeats(){
   if(!board.goals || board.goals.length===0) return;
-  // If everything was used, start over (but still avoid immediate repeat if possible)
+  // If everything was used, show message and start a new game
   if(usedGoals.size >= board.goals.length){
-    usedGoals.clear();
+    setTimeout(()=>{
+      alert("🎉 Kaikki kohteet löydetty! Arvotaan uusi peli.");
+      board = createBoardRandom(4);
+      resetMoveHistory();
+      usedGoals.clear();
+      if(board.goal) usedGoals.add(goalKey(board.goal));
+      selectedRobot = 0;
+      solList.innerHTML = "";
+      moveCount = 0;
+      setStatus("Uusi peli alkaa!");
+      draw();
+    }, 100);
+    return;
   }
   const prevKey = board.goal ? goalKey(board.goal) : null;
   const candidates = [];
@@ -479,21 +491,21 @@ function drawRobotHead(cx, cy, r, color, isSelected){
 
 function drawShape(shape, x,y, r){
   ctx.beginPath();
-  if(shape==="circle"){
+  if(shape==="Ympyrä"){
     ctx.arc(x,y,r,0,Math.PI*2);
-  } else if(shape==="triangle"){
+  } else if(shape==="Kolmio"){
     ctx.moveTo(x, y-r);
     ctx.lineTo(x-r*0.9, y+r*0.8);
     ctx.lineTo(x+r*0.9, y+r*0.8);
     ctx.closePath();
-  } else if(shape==="square"){
+  } else if(shape==="Neliö"){
     ctx.rect(x-r, y-r, 2*r, 2*r);
-  } else if(shape==="vortex"){
+  } else if(shape==="Vortex"){
     ctx.arc(x,y,r,0,Math.PI*2);
     ctx.moveTo(x, y);
     ctx.arc(x,y,r*0.6,0,Math.PI*1.5);
   } 
-else if(shape==="star"){
+else if(shape==="Tähti"){
     // 5-point star centered at (x,y)
     const r1 = r * 1.35;   // outer radius
 					   
@@ -727,6 +739,13 @@ cv.addEventListener("pointercancel", (e)=>{
 });
 
 window.addEventListener("keydown",(e)=>{
+  // Robot selection: P=Punainen(0), V=Vihreä(1), S=Sininen(2), K=Keltainen(3)
+  const key = e.key.toUpperCase();
+  if(key==="P"){ selectedRobot=0; draw(); return; }
+  if(key==="V"){ selectedRobot=1; draw(); return; }
+  if(key==="S"){ selectedRobot=2; draw(); return; }
+  if(key==="K"){ selectedRobot=3; draw(); return; }
+
   let dir=null;
   if(e.key==="ArrowUp") dir="N";
   if(e.key==="ArrowRight") dir="E";
