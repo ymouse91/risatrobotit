@@ -67,6 +67,7 @@ select{background:#0e1730;color:#e9eef7;border:1px solid rgba(255,255,255,.18);b
   /* Piilota: Build-tila, Etsi ratkaisu, Syvyys (label+pilleri) */
   #buildBtn{ display:none !important; }
   #solveBtn{ display:none !important; }
+  #startPlayBtn{ display:none !important; }
   .pill{ display:none !important; }   /* sisältää Syvyys + input */
 
   /* Piilota oikeasta laidasta Ohje-kortti kokonaan.
