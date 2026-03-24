@@ -64,14 +64,23 @@
           <li>Liikuta nuolinäppäimillä tai painikkeilla.</li>
           <li>Build-tilassa klikkaus laudalla asettaa valitun robotin.</li>
         </ul>
-        <div class="moveBtns">
-          <button class="btn" data-dir="N">↑</button>
-          <div class="row">
-            <button class="btn" data-dir="W">←</button>
-            <button class="btn" data-dir="S">↓</button>
-            <button class="btn" data-dir="E">→</button>
-          </div>
-        </div>
+<div class="moveArea">
+  <div class="moveBtns">
+    <button class="btn" data-dir="N">↑</button>
+    <div class="row">
+      <button class="btn" data-dir="W">←</button>
+      <button class="btn" data-dir="S">↓</button>
+      <button class="btn" data-dir="E">→</button>
+    </div>
+  </div>
+
+  <div class="robotColorPick" id="robotColorPick">
+    <button type="button" class="colorRobotBtn red active" data-robot="0" title="Punainen"></button>
+    <button type="button" class="colorRobotBtn green" data-robot="1" title="Vihreä"></button>
+    <button type="button" class="colorRobotBtn blue" data-robot="2" title="Sininen"></button>
+    <button type="button" class="colorRobotBtn yellow" data-robot="3" title="Keltainen"></button>
+  </div>
+</div>
       </div>
 
       <div class="card">

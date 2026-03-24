@@ -677,10 +677,11 @@ cv.addEventListener("pointerdown", (e)=>{
       refreshBuildUIFromBoard();
       setStatus("Valittu robotti: " + ROBOT_NAMES[hit]);
       draw();
-    }else{
-      selectedRobot=hit;
-      draw();
-    }
+}else{
+  selectedRobot=hit;
+  refreshColorRobotButtons();
+  draw();
+}
   }
 });
 
@@ -741,10 +742,10 @@ cv.addEventListener("pointercancel", (e)=>{
 window.addEventListener("keydown",(e)=>{
   // Robot selection: P=Punainen(0), V=Vihreä(1), S=Sininen(2), K=Keltainen(3)
   const key = e.key.toUpperCase();
-  if(key==="P"){ selectedRobot=0; draw(); return; }
-  if(key==="V"){ selectedRobot=1; draw(); return; }
-  if(key==="S"){ selectedRobot=2; draw(); return; }
-  if(key==="K"){ selectedRobot=3; draw(); return; }
+if(key==="P"){ selectedRobot=0; refreshColorRobotButtons(); draw(); return; }
+if(key==="V"){ selectedRobot=1; refreshColorRobotButtons(); draw(); return; }
+if(key==="S"){ selectedRobot=2; refreshColorRobotButtons(); draw(); return; }
+if(key==="K"){ selectedRobot=3; refreshColorRobotButtons(); draw(); return; }
 
   let dir=null;
   if(e.key==="ArrowUp") dir="N";
@@ -759,6 +760,26 @@ window.addEventListener("keydown",(e)=>{
 document.querySelectorAll(".moveBtns .btn").forEach(btn=>{
   btn.addEventListener("click", ()=> doMove(btn.dataset.dir));
 });
+
+const robotColorPickEl = document.getElementById("robotColorPick");
+
+function refreshColorRobotButtons(){
+  if(!robotColorPickEl) return;
+  robotColorPickEl.querySelectorAll(".colorRobotBtn").forEach(btn=>{
+    const idx = Number(btn.dataset.robot);
+    btn.classList.toggle("active", idx === selectedRobot);
+  });
+}
+
+if(robotColorPickEl){
+  robotColorPickEl.querySelectorAll(".colorRobotBtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      selectedRobot = Number(btn.dataset.robot);
+      refreshColorRobotButtons();
+      draw();
+    });
+  });
+}
 
 function doMove(dir){
   const moved = board.moveRobot(selectedRobot, dir);
@@ -1202,7 +1223,7 @@ cv.addEventListener("pointerdown", (e)=>{
 
 // Ensure build panel is hidden on load
 setBuildMode(false);
-
+refreshColorRobotButtons();
 draw();
 
 /* SERVICE WORKER */
