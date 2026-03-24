@@ -1,11 +1,11 @@
 /* Minimal SW: cache app shell */
-const CACHE = "risatrobot-v2";
+const CACHE = "risatrobot-v4";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./app.js",
-  "./styles.css",
+  "./style.css",
   "./icon192.png"
 ];
 
