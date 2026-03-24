@@ -316,9 +316,9 @@ let buildSelectedRobot = 0; // which robot is placed by clicking in build mode
 
 function setBuildMode(on){
   isBuildMode = !!on;
+  document.body.classList.toggle("buildMode", isBuildMode);
   const bp = document.getElementById("buildPanel");
   if(bp) bp.style.display = isBuildMode ? "" : "none";
-  // In build mode, solver controls are still visible, but you typically use "Aloita peli"
   setStatus(isBuildMode ? "Build-tila: aseta kvadrantit, robotit ja tavoite." : "Pelitila.");
   draw();
 }
@@ -358,8 +358,19 @@ function goalReachableInOneMove(g){
   }
   return false;
 }								   
+function updateGoalInfo(){
+  const goalInfo = document.getElementById("goalInfo");
+  if(!goalInfo || !board.goal) return;
+
+  const n = usedGoals.size;
+  const total = board.goals.length;
+
+  goalInfo.textContent = `Tavoite: ${n}/${total} - ${goalLabel(board.goal)}`;
+}
+
 function pickNewGoalAvoidRepeats(){
   if(!board.goals || board.goals.length===0) return;
+
   // If everything was used, show message and start a new game
   if(usedGoals.size >= board.goals.length){
     setTimeout(()=>{
@@ -372,16 +383,18 @@ function pickNewGoalAvoidRepeats(){
       solList.innerHTML = "";
       moveCount = 0;
       setStatus("Uusi peli alkaa!");
+      updateGoalInfo();
       draw();
     }, 100);
     return;
   }
+
   const prevKey = board.goal ? goalKey(board.goal) : null;
   const candidates = [];
   for(const g of board.goals){
     const k = goalKey(g);
     if(usedGoals.has(k)) continue;
-	if(goalReachableInOneMove(g)) continue; // avoid trivial straight-line one-move goals																					 
+    if(goalReachableInOneMove(g)) continue; // avoid trivial straight-line one-move goals
     candidates.push(g);
   }
 
@@ -396,6 +409,7 @@ function pickNewGoalAvoidRepeats(){
     }
     pool = cand2.length ? cand2 : board.goals.slice();
   }
+
   // Avoid immediate repeat if there is an alternative
   let g = pool[(Math.random()*pool.length)|0];
   if(prevKey && pool.length>1){
@@ -403,11 +417,14 @@ function pickNewGoalAvoidRepeats(){
       g = pool[(Math.random()*pool.length)|0];
     }
   }
+
   board.goal = g;
   usedGoals.add(goalKey(g));
+  updateGoalInfo();
 }
 // Seed with the initial goal
 if(board.goal) usedGoals.add(goalKey(board.goal));
+updateGoalInfo();
 
 function setStatus(t){ statusEl.textContent=t; }
 
@@ -653,6 +670,7 @@ function draw(){
   goalInfoEl.textContent = board.goal
     ? ("Tavoite: " + board.goal.shape + (board.goal.robot===-1 ? " (mikä tahansa)" : (" / " + ROBOT_NAMES[board.goal.robot])))
     : "";
+  updateGoalInfo();
   selInfoEl.textContent = "Valittu robotti: " + ROBOT_NAMES[selectedRobot];
 }
 
@@ -1171,6 +1189,7 @@ if(startPlayBtn){
     board.startGoal = board.goal;
     usedGoals.clear();
     if(board.goal) usedGoals.add(goalKey(board.goal));
+	updateGoalInfo();
     solList.innerHTML = "";
     setBuildMode(false);
     setStatus("Peli aloitettu tästä asetelmasta.");
