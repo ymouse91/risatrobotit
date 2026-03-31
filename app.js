@@ -873,8 +873,8 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
 document.getElementById("resetBtn").addEventListener("click", ()=>{
   if(board.startRobots) board.robots = new Int16Array(board.startRobots);
   if(board.startGoal) board.goal = board.startGoal;
-  usedGoals.clear();
-  if(board.goal) usedGoals.add(goalKey(board.goal));
+
+
   solList.innerHTML="";
   pendingStartCapture = false; pendingStartRobots = null; pendingStartGoal = null;																			  
   setStatus("Alkuasetelma palautettu.");
