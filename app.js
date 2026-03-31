@@ -368,6 +368,14 @@ function updateGoalInfo(){
   goalInfo.textContent = `Tavoite: ${n}/${total} - ${goalLabel(board.goal)}`;
 }
 
+function goalOccupiedByRobot(g){
+  if(!g) return false;
+  for(const r of board.robots){
+    if(r.x === g.x && r.y === g.y) return true;
+  }
+  return false;
+}
+
 function pickNewGoalAvoidRepeats(){
   if(!board.goals || board.goals.length===0) return;
 
@@ -383,44 +391,56 @@ function pickNewGoalAvoidRepeats(){
       solList.innerHTML = "";
       moveCount = 0;
       setStatus("Uusi peli alkaa!");
-      updateGoalInfo();
       draw();
     }, 100);
     return;
   }
 
   const prevKey = board.goal ? goalKey(board.goal) : null;
-  const candidates = [];
+
+  // 1️⃣ Tiukin suodatus: ei käytetty, ei robotin alla, ei 1-siirron kohde
+  let candidates = [];
   for(const g of board.goals){
     const k = goalKey(g);
     if(usedGoals.has(k)) continue;
-    if(goalReachableInOneMove(g)) continue; // avoid trivial straight-line one-move goals
+    if(goalOccupiedByRobot(g)) continue;
+    if(goalReachableInOneMove(g)) continue;
     candidates.push(g);
   }
 
-  // If empty due to straight-line filter, relax it (still keep usedGoals filter)
-  let pool = candidates.length ? candidates : null;
-  if(!pool){
-    const cand2 = [];
-    for(const g2 of board.goals){
-      const k2 = goalKey(g2);
-      if(usedGoals.has(k2)) continue;
-      cand2.push(g2);
-    }
-    pool = cand2.length ? cand2 : board.goals.slice();
-  }
-
-  // Avoid immediate repeat if there is an alternative
-  let g = pool[(Math.random()*pool.length)|0];
-  if(prevKey && pool.length>1){
-    for(let tries=0; tries<10 && goalKey(g)===prevKey; tries++){
-      g = pool[(Math.random()*pool.length)|0];
+  // 2️⃣ Jos ei löytynyt → sallitaan 1-siirron kohteet (mutta ei robotin alla)
+  if(candidates.length === 0){
+    for(const g of board.goals){
+      const k = goalKey(g);
+      if(usedGoals.has(k)) continue;
+      if(goalOccupiedByRobot(g)) continue;
+      candidates.push(g);
     }
   }
 
+  // 3️⃣ Jos edelleen ei löytynyt → mikä tahansa käyttämätön
+  if(candidates.length === 0){
+    for(const g of board.goals){
+      const k = goalKey(g);
+      if(usedGoals.has(k)) continue;
+      candidates.push(g);
+    }
+  }
+
+  // 4️⃣ Viimeinen fallback → ihan mikä tahansa (harvinainen tilanne)
+  if(candidates.length === 0){
+    candidates = board.goals.slice();
+  }
+
+  // Poistetaan edellinen kohde jos mahdollista
+  const filtered = candidates.filter(g => goalKey(g) !== prevKey);
+  const pool = filtered.length ? filtered : candidates;
+
+  const g = pool[Math.floor(Math.random() * pool.length)];
   board.goal = g;
   usedGoals.add(goalKey(g));
-  updateGoalInfo();
+
+  draw();
 }
 // Seed with the initial goal
 if(board.goal) usedGoals.add(goalKey(board.goal));
