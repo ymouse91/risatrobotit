@@ -25,6 +25,70 @@ let moveCount = 0;
 function randInt(n){ return (Math.random()*n)|0; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=randInt(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
+// --- LocalStorage: tallenna/lataa pelitila ---
+const LS_KEY = "driftingDroids_state";
+
+function saveGameState(){
+  if(!board || !board.quadPick) return;
+  try {
+    const state = {
+      quadPick: Array.from(board.quadPick),
+      robots: Array.from(board.robots),
+      startRobots: board.startRobots ? Array.from(board.startRobots) : null,
+      goal: board.goal ? { x: board.goal.x, y: board.goal.y, robot: board.goal.robot, shape: board.goal.shape } : null,
+      startGoal: board.startGoal ? { x: board.startGoal.x, y: board.startGoal.y, robot: board.startGoal.robot, shape: board.startGoal.shape } : null,
+      usedGoals: Array.from(usedGoals),
+      moveCount: moveCount,
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch(e) { /* tallennus epäonnistui, ohitetaan */ }
+}
+
+function loadGameState(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function restoreGameFromState(state){
+  if(!state || !state.quadPick || state.quadPick.length !== 4) return false;
+
+  // Rakenna lauta tallennettujen kvadranttien perusteella
+  const b = new Board(16, 16, 4);
+  b.walls = Array.from({length:4}, ()=> new Uint8Array(b.size));
+  b.goals = [];
+  b.goal = null;
+  b.quadPick = state.quadPick.slice();
+  for(let qPos = 0; qPos < 4; qPos++){
+    addQuadrant(b, b.quadPick[qPos], qPos);
+  }
+  b.addOuterWalls();
+
+  // Robottien sijainnit
+  b.robots = new Int16Array(state.robots);
+
+  // Alkuasetelma (resettiä varten)
+  b.startRobots = state.startRobots ? new Int16Array(state.startRobots) : new Int16Array(state.robots);
+
+  // Etsi tavoite laudan goals-listasta
+  const findGoal = (g) => {
+    if(!g) return null;
+    return b.goals.find(bg => bg.x === g.x && bg.y === g.y && bg.robot === g.robot && bg.shape === g.shape) || null;
+  };
+
+  b.goal = findGoal(state.goal);
+  b.startGoal = findGoal(state.startGoal) || b.goal;
+
+  if(!b.goal) return false; // tavoite ei löytynyt, aloitetaan alusta
+
+  board = b;
+  usedGoals = new Set(state.usedGoals || []);
+  moveCount = state.moveCount || 0;
+  return true;
+}
+
 // --- Board ---
 class Board {
   constructor(w=16,h=16,numRobots=4){
@@ -343,6 +407,19 @@ function goalKey(g){
   return g.pos + "|" + g.robot + "|" + g.shape;
 }
 
+// Yritä ladata tallennettu pelitila (tehtävä usedGoals- ja goalKey-määrittelyn jälkeen)
+{
+  const saved = loadGameState();
+  if(saved && restoreGameFromState(saved)){
+    // Tila ladattu onnistuneesti
+  } else {
+    // Ei tallennettua tilaa tai lataus epäonnistui → uusi peli
+    usedGoals.clear();
+    if(board.goal) usedGoals.add(goalKey(board.goal));
+    moveCount = 0;
+  }
+}
+
 function goalReachableInOneMove(g){
   if(!g) return false;
   const dirs = ["N","E","S","W"];
@@ -392,6 +469,7 @@ function pickNewGoalAvoidRepeats(){
       moveCount = 0;
       setStatus("Uusi peli alkaa!");
       draw();
+      saveGameState();
     }, 100);
     return;
   }
@@ -839,6 +917,7 @@ function doMove(dir){
   moveCount++;
   setStatus("Siirto " + moveCount +".");
   draw();
+  saveGameState();
 
   if(board.isSolved()){
 	solList.innerHTML = ""; // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
@@ -856,6 +935,7 @@ function doMove(dir){
     // Keep robots where they are; only the goal changes
     resetMoveHistory();
     draw();
+    saveGameState();
   }
 }
 
@@ -866,8 +946,10 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
   if(board.goal) usedGoals.add(goalKey(board.goal));
   selectedRobot=0;
   solList.innerHTML="";
+  moveCount=0;
   setStatus("Uusi lauta.");
   draw();
+  saveGameState();
 });
 
 document.getElementById("resetBtn").addEventListener("click", ()=>{
@@ -889,6 +971,7 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
   resetMoveHistory();
   updateGoalInfo();
   draw();
+  saveGameState();
 });
 
 // --- BFS solver (depth limited) ---
@@ -1223,6 +1306,7 @@ if(startPlayBtn){
     setBuildMode(false);
     setStatus("Peli aloitettu tästä asetelmasta.");
     draw();
+    saveGameState();
   });
 }
 
