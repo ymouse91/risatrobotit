@@ -871,14 +871,23 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
 });
 
 document.getElementById("resetBtn").addEventListener("click", ()=>{
+  // Jos uusi kohde on juuri arvottu, mutta sitä ei ole vielä "aloitettu"
+  // ensimmäisellä onnistuneella siirrolla, perutaan sen lisäys laskurista.
+  if (pendingStartCapture && pendingStartGoal) {
+    usedGoals.delete(goalKey(pendingStartGoal));
+  }
+
   if(board.startRobots) board.robots = new Int16Array(board.startRobots);
   if(board.startGoal) board.goal = board.startGoal;
 
+  solList.innerHTML = "";
+  pendingStartCapture = false;
+  pendingStartRobots = null;
+  pendingStartGoal = null;
 
-  solList.innerHTML="";
-  pendingStartCapture = false; pendingStartRobots = null; pendingStartGoal = null;																			  
   setStatus("Alkuasetelma palautettu.");
   resetMoveHistory();
+  updateGoalInfo();
   draw();
 });
 
