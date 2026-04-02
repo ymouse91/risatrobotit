@@ -1,5 +1,5 @@
 /* Minimal SW: cache app shell */
-const CACHE = "risatrobot-v5";
+const CACHE = "risatrobot-v6";
 const ASSETS = [
   "./",
   "./index.html",
