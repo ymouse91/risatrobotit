@@ -1,12 +1,14 @@
 /* Minimal SW: cache app shell */
-const CACHE = "risatrobot-v6";
+const CACHE = "risatrobot-v7";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./app.js",
   "./style.css",
-  "./icon192.png"
+  "./icon192.png",
+  "./fonts/orbitron-v35-latin-variable.woff2",
+  "./fonts/share-tech-mono-v16-latin-regular.woff2"
 ];
 
 self.addEventListener("install", (event) => {
