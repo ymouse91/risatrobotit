@@ -358,6 +358,17 @@ let pendingStartCapture = false;
 let pendingStartRobots = null;
 let pendingStartGoal = null;
 
+// When a solution is visible, reset must return to the exact task that was
+// solved, even if the normal start state still points at the previous goal.
+let shownSolutionStartRobots = null;
+let shownSolutionStartGoal = null;
+
+function clearShownSolution(){
+  solList.innerHTML = "";
+  shownSolutionStartRobots = null;
+  shownSolutionStartGoal = null;
+}
+
 function isOppositeDir(a,b){
   return (a==="N"&&b==="S")||(a==="S"&&b==="N")||(a==="E"&&b==="W")||(a==="W"&&b==="E");
 }
@@ -470,7 +481,7 @@ function pickNewGoalAvoidRepeats(){
       usedGoals.clear();
       if(board.goal) usedGoals.add(goalKey(board.goal));
       selectedRobot = 0;
-      solList.innerHTML = "";
+      clearShownSolution();
       moveCount = 0;
       setStatus("Uusi peli alkaa!");
       draw();
@@ -925,7 +936,7 @@ function doMove(dir){
   saveGameState();
 
   if(board.isSolved()){
-	solList.innerHTML = ""; // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
+	clearShownSolution(); // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
 
     setStatus("✅ Ratkaistu " + moveCount+ " siirrolla. Uusi kohde arvottu.");
 	moveCount = 0;
@@ -950,7 +961,7 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
   usedGoals.clear();
   if(board.goal) usedGoals.add(goalKey(board.goal));
   selectedRobot=0;
-  solList.innerHTML="";
+  clearShownSolution();
   moveCount=0;
   setStatus("Uusi lauta.");
   draw();
@@ -958,16 +969,26 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
 });
 
 document.getElementById("resetBtn").addEventListener("click", ()=>{
+  const solutionStartRobots = shownSolutionStartRobots ? new Int16Array(shownSolutionStartRobots) : null;
+  const solutionStartGoal = shownSolutionStartGoal;
+  const resetToShownSolution = !!(solutionStartRobots && solutionStartGoal);
+
   // Jos uusi kohde on juuri arvottu, mutta sitä ei ole vielä "aloitettu"
   // ensimmäisellä onnistuneella siirrolla, perutaan sen lisäys laskurista.
-  if (pendingStartCapture && pendingStartGoal) {
+  if (!resetToShownSolution && pendingStartCapture && pendingStartGoal) {
     usedGoals.delete(goalKey(pendingStartGoal));
   }
 
-  if(board.startRobots) board.robots = new Int16Array(board.startRobots);
-  if(board.startGoal) board.goal = board.startGoal;
+  if(resetToShownSolution){
+    board.robots = solutionStartRobots;
+    board.goal = solutionStartGoal;
+  } else {
+    if(board.startRobots) board.robots = new Int16Array(board.startRobots);
+    if(board.startGoal) board.goal = board.startGoal;
+  }
 
-  solList.innerHTML = "";
+  clearShownSolution();
+
   pendingStartCapture = false;
   pendingStartRobots = null;
   pendingStartGoal = null;
@@ -1097,7 +1118,7 @@ function solveBFS(maxDepth){
 }
 
 document.getElementById("solveBtn").addEventListener("click", ()=>{
-  solList.innerHTML="";
+  clearShownSolution();
   const maxDepth = Math.max(1, Math.min(25, parseInt(document.getElementById("depthInp").value||"12",10)));
   setStatus("Haetaan ratkaisua…");
   setTimeout(()=>{
@@ -1107,6 +1128,8 @@ document.getElementById("solveBtn").addEventListener("click", ()=>{
       return;
     }
     setStatus("✅ Ratkaisu löytyi: " + res.length + " siirtoa");
+    shownSolutionStartRobots = new Int16Array(board.robots);
+    shownSolutionStartGoal = board.goal;
     solList.innerHTML="";
 res.forEach((m)=>{
   const li = document.createElement("li");
@@ -1235,7 +1258,7 @@ function rebuildBoardWithQuadrants(qPick){
   usedGoals.clear();
   if(board.goal) usedGoals.add(goalKey(board.goal));
   resetMoveHistory();
-  solList.innerHTML = "";
+  clearShownSolution();
   draw();
   refreshBuildUIFromBoard();
 }
@@ -1273,6 +1296,7 @@ if(goalSel){
     const g = board.goals[idx];
     if(g){
       board.goal = g;
+      clearShownSolution();
       draw();
     }
   });
@@ -1286,7 +1310,7 @@ if(startPlayBtn){
     usedGoals.clear();
     if(board.goal) usedGoals.add(goalKey(board.goal));
 	updateGoalInfo();
-    solList.innerHTML = "";
+    clearShownSolution();
     setBuildMode(false);
     setStatus("Peli aloitettu tästä asetelmasta.");
     draw();
@@ -1304,6 +1328,7 @@ function placeRobotAtCell(robo, x, y){
     if(i!==robo && board.robots[i]===pos) return false;
   }
   board.robots[robo] = pos;
+  clearShownSolution();
   draw();
   return true;
 }
