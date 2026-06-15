@@ -39,6 +39,9 @@ function saveGameState(){
       startGoal: board.startGoal ? { x: board.startGoal.x, y: board.startGoal.y, robot: board.startGoal.robot, shape: board.startGoal.shape } : null,
       usedGoals: Array.from(usedGoals),
       moveCount: moveCount,
+      totalMoves: totalMoves,
+      lastDir: Array.from(lastDir),
+      hasRightAngleTurn: Array.from(hasRightAngleTurn),
     };
     localStorage.setItem(LS_KEY, JSON.stringify(state));
   } catch(e) { /* tallennus epäonnistui, ohitetaan */ }
@@ -86,6 +89,11 @@ function restoreGameFromState(state){
   board = b;
   usedGoals = new Set(state.usedGoals || []);
   moveCount = state.moveCount || 0;
+  totalMoves = state.totalMoves || 0;
+  lastDir = Array.isArray(state.lastDir) ? state.lastDir.slice(0, b.robots.length) : [];
+  hasRightAngleTurn = Array.isArray(state.hasRightAngleTurn) ? state.hasRightAngleTurn.slice(0, b.robots.length) : [];
+  while(lastDir.length < b.robots.length) lastDir.push(null);
+  while(hasRightAngleTurn.length < b.robots.length) hasRightAngleTurn.push(false);
   return true;
 }
 
@@ -447,10 +455,7 @@ function updateGoalInfo(){
 
 function goalOccupiedByRobot(g){
   if(!g) return false;
-  for(const r of board.robots){
-    if(r.x === g.x && r.y === g.y) return true;
-  }
-  return false;
+  return board.isRobotAt(g.pos);
 }
 
 function pickNewGoalAvoidRepeats(){
@@ -967,6 +972,7 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
   pendingStartRobots = null;
   pendingStartGoal = null;
 
+  moveCount = 0;
   setStatus("Alkuasetelma palautettu.");
   resetMoveHistory();
   updateGoalInfo();
@@ -975,51 +981,6 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
 });
 
 // --- BFS solver (depth limited) ---
-function validateSolutionTurnRule(moves, startRobots){
-  // Simulate moves from the start position and check the "must make a 90° turn" rule.
-  const robots = Array.from(startRobots || board.robots);
-  const n = robots.length;
-  let total = 0;
-  const last = Array(n).fill(null);
-  const hasTurn = Array(n).fill(false);
-
-  const slide = (robo, dirChar)=>{
-    const dir = DIR_IDX[dirChar];
-    let pos = robots[robo];
-    const [dx,dy]=DXY[dir];
-    const isRobotAt = (p)=> robots.some(v=>v===p);
-    while(true){
-      if(board.walls[dir][pos]) break;
-      const [x,y]=board.xy(pos);
-      const nx=x+dx, ny=y+dy;
-      const npos=board.idx(nx,ny);
-      if(isRobotAt(npos)) break;
-      pos = npos;
-    }
-    robots[robo]=pos;
-  };
-
-  for(const m of moves){
-    total++;
-    slide(m.r, m.dir);
-    const prev = last[m.r];
-    if(prev && m.dir !== prev && !isOppositeDir(prev, m.dir)) hasTurn[m.r] = true;
-    last[m.r] = m.dir;
-  }
-
-  if(total < 2) return false;
-
-  const goalPos = board.goal.pos;
-  const goalRobot = board.goal.robot;
-  if(goalRobot === -1){
-    for(let i=0;i<n;i++){
-      if(robots[i]===goalPos) return !!hasTurn[i];
-    }
-    return false;
-  }
-  return robots[goalRobot]===goalPos && !!hasTurn[goalRobot];
-}
-
 function encodeKey(robots){
   // Use BigInt to avoid collisions when there are 5 robots (32-bit packing would overflow).
   // Each robot position fits in 0..255, so 8 bits per robot is enough.
@@ -1029,6 +990,13 @@ function encodeKey(robots){
   }
   return k;
 }
+
+function encodeSolverState(node){
+  const dirKey = node.lastDir.map(d => d || "-").join("");
+  const turnKey = node.hasTurn.map(v => v ? "1" : "0").join("");
+  return encodeKey(node.robots).toString() + "|" + dirKey + "|" + turnKey;
+}
+
 function cloneRobots(arr){ return new Int16Array(arr); }
 
 function moveRobotStatic(boardRef, robotsArr, robo, dirChar){
@@ -1064,8 +1032,12 @@ function reconstructSolution(goalKey, parent){
 }
 
 function solveBFS(maxDepth){
-  const start = cloneRobots(board.robots);
-  const startKey = encodeKey(start);
+  const start = {
+    robots: cloneRobots(board.robots),
+    lastDir: Array(board.robots.length).fill(null),
+    hasTurn: Array(board.robots.length).fill(false),
+  };
+  const startKey = encodeSolverState(start);
 
   const q = [];
   const parent = new Map(); // key -> {p, m:{r,dir}}
@@ -1078,30 +1050,42 @@ function solveBFS(maxDepth){
   const goalPos = board.goal.pos;
   const goalRobot = board.goal.robot;
 
-  const isSolvedRobots = (robots)=>{
+  const isSolvedNode = (node, d)=>{
+    if(d < 2) return false;
+    const robots = node.robots;
     if(goalRobot===-1){
-      for(let i=0;i<robots.length;i++) if(robots[i]===goalPos) return true;
+      for(let i=0;i<robots.length;i++){
+        if(robots[i]===goalPos) return !!node.hasTurn[i];
+      }
       return false;
     }
-    return robots[goalRobot]===goalPos;
+    return robots[goalRobot]===goalPos && !!node.hasTurn[goalRobot];
   };
 
   while(q.length){
     const cur = q.shift();
-    const curKey = encodeKey(cur);
+    const curKey = encodeSolverState(cur);
     const d = depth.get(curKey);
-    if(isSolvedRobots(cur)){
-      const sol = reconstructSolution(curKey, parent);
-      if(validateSolutionTurnRule(sol, start)) return sol;
-      // otherwise ignore this too-straight solution and keep searching
-    }
+    if(isSolvedNode(cur, d)) return reconstructSolution(curKey, parent);
     if(d>=maxDepth) continue;
 
-    for(let r=0;r<cur.length;r++){
+    for(let r=0;r<cur.robots.length;r++){
       for(const dir of DIRS){
-        const next = cloneRobots(cur);
-        if(!moveRobotStatic(board, next, r, dir)) continue;
-        const nk = encodeKey(next);
+        const nextRobots = cloneRobots(cur.robots);
+        if(!moveRobotStatic(board, nextRobots, r, dir)) continue;
+
+        const nextLastDir = cur.lastDir.slice();
+        const nextHasTurn = cur.hasTurn.slice();
+        const prev = nextLastDir[r];
+        if(prev && dir !== prev && !isOppositeDir(prev, dir)) nextHasTurn[r] = true;
+        nextLastDir[r] = dir;
+
+        const next = {
+          robots: nextRobots,
+          lastDir: nextLastDir,
+          hasTurn: nextHasTurn,
+        };
+        const nk = encodeSolverState(next);
         if(parent.has(nk)) continue;
         parent.set(nk, {p:curKey, m:{r,dir}});
         depth.set(nk, d+1);
