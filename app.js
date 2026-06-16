@@ -358,17 +358,6 @@ let pendingStartCapture = false;
 let pendingStartRobots = null;
 let pendingStartGoal = null;
 
-// When a solution is visible, reset must return to the exact task that was
-// solved, even if the normal start state still points at the previous goal.
-let shownSolutionStartRobots = null;
-let shownSolutionStartGoal = null;
-
-function clearShownSolution(){
-  solList.innerHTML = "";
-  shownSolutionStartRobots = null;
-  shownSolutionStartGoal = null;
-}
-
 function isOppositeDir(a,b){
   return (a==="N"&&b==="S")||(a==="S"&&b==="N")||(a==="E"&&b==="W")||(a==="W"&&b==="E");
 }
@@ -481,7 +470,7 @@ function pickNewGoalAvoidRepeats(){
       usedGoals.clear();
       if(board.goal) usedGoals.add(goalKey(board.goal));
       selectedRobot = 0;
-      clearShownSolution();
+      solList.innerHTML = "";
       moveCount = 0;
       setStatus("Uusi peli alkaa!");
       draw();
@@ -936,7 +925,7 @@ function doMove(dir){
   saveGameState();
 
   if(board.isSolved()){
-	clearShownSolution(); // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
+	solList.innerHTML = ""; // <-- TYHJENTÄÄ Ratkaisu-listan ruudulta
 
     setStatus("✅ Ratkaistu " + moveCount+ " siirrolla. Uusi kohde arvottu.");
 	moveCount = 0;
@@ -961,7 +950,7 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
   usedGoals.clear();
   if(board.goal) usedGoals.add(goalKey(board.goal));
   selectedRobot=0;
-  clearShownSolution();
+  solList.innerHTML="";
   moveCount=0;
   setStatus("Uusi lauta.");
   draw();
@@ -969,26 +958,16 @@ document.getElementById("newBtn").addEventListener("click", ()=>{
 });
 
 document.getElementById("resetBtn").addEventListener("click", ()=>{
-  const solutionStartRobots = shownSolutionStartRobots ? new Int16Array(shownSolutionStartRobots) : null;
-  const solutionStartGoal = shownSolutionStartGoal;
-  const resetToShownSolution = !!(solutionStartRobots && solutionStartGoal);
-
   // Jos uusi kohde on juuri arvottu, mutta sitä ei ole vielä "aloitettu"
   // ensimmäisellä onnistuneella siirrolla, perutaan sen lisäys laskurista.
-  if (!resetToShownSolution && pendingStartCapture && pendingStartGoal) {
+  if (pendingStartCapture && pendingStartGoal) {
     usedGoals.delete(goalKey(pendingStartGoal));
   }
 
-  if(resetToShownSolution){
-    board.robots = solutionStartRobots;
-    board.goal = solutionStartGoal;
-  } else {
-    if(board.startRobots) board.robots = new Int16Array(board.startRobots);
-    if(board.startGoal) board.goal = board.startGoal;
-  }
+  if(board.startRobots) board.robots = new Int16Array(board.startRobots);
+  if(board.startGoal) board.goal = board.startGoal;
 
-  clearShownSolution();
-
+  solList.innerHTML = "";
   pendingStartCapture = false;
   pendingStartRobots = null;
   pendingStartGoal = null;
@@ -1002,48 +981,32 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
 });
 
 // --- BFS solver (depth limited) ---
-function encodeKey(robots){
-  // Use BigInt to avoid collisions when there are 5 robots (32-bit packing would overflow).
-  // Each robot position fits in 0..255, so 8 bits per robot is enough.
-  let k = 0n;
-  for(let i=0;i<robots.length;i++){
-    k |= (BigInt(robots[i]) & 255n) << (8n * BigInt(i));
-  }
-  return k;
-}
-
-function encodeSolverState(node){
-  const dirKey = node.lastDir.map(d => d || "-").join("");
-  const turnKey = node.hasTurn.map(v => v ? "1" : "0").join("");
-  return encodeKey(node.robots).toString() + "|" + dirKey + "|" + turnKey;
-}
+//
+// Tehostukset alkuperaiseen verrattuna:
+//  1) Tila-avain seuraa suunta/kulma-historiaa VAIN sille robotille, jota
+//     tavoite koskee (tavallisin tapaus, goal.robot != -1). Muiden
+//     robottien suunta/kulma-tila ei vaikuta liikkeisiin eika
+//     maaliehtoon, joten sen mukaan ottaminen avaimeen kasvatti
+//     tila-avaruutta turhaan kertaluokkaa 10^(robottien lkm) - tama oli
+//     ylivoimaisesti suurin hidastaja. Kun mika tahansa robotti voi
+//     taydentaa tavoitteen (goal.robot === -1), kaikkien on edelleen
+//     pakko pysya mukana avaimessa.
+//  2) Avaimena kaytetaan suoraan numeroa (tai BigIntia vain silloin kun
+//     bittimaara ei muuten mahtuisi turvalliseen kokonaislukualueeseen),
+//     ei merkkijonoa - vältetaan toString()-muunnokset Map-avaimissa.
+//  3) Jono kasitellaan paaosoittimella (head) shift()-kutsun sijaan,
+//     jottei jokainen pop ole O(n) (alkuperainen q.shift() teki BFS:sta
+//     kaytannossa O(n^2)).
+//  4) Robottitaulukko kloonataan vain kun siirto oikeasti onnistuu, ei
+//     joka yritetylle suunnalle.
 
 function cloneRobots(arr){ return new Int16Array(arr); }
 
-function moveRobotStatic(boardRef, robotsArr, robo, dirChar){
-  const dir = DIR_IDX[dirChar];
-  let pos = robotsArr[robo];
-  const dx = DXY[dir][0], dy = DXY[dir][1];
-  const isRobotAt = (p)=>{ for(let i=0;i<robotsArr.length;i++) if(robotsArr[i]===p) return true; return false; };
-  while(true){
-    if(boardRef.walls[dir][pos]) break;
-    const x = pos % boardRef.w;
-    const y = (pos/boardRef.w)|0;
-    const nx=x+dx, ny=y+dy;
-    const npos = nx + ny*boardRef.w;
-    if(isRobotAt(npos)) break;
-    pos=npos;
-  }
-  const moved = (pos!==robotsArr[robo]);
-  robotsArr[robo]=pos;
-  return moved;
-}
-
-function reconstructSolution(goalKey, parent){
+function reconstructSolution(goalKey, visited){
   const moves=[];
   let k=goalKey;
   while(true){
-    const node = parent.get(k);
+    const node = visited.get(k);
     if(!node) break;
     moves.push(node.m);
     k=node.p;
@@ -1053,72 +1016,122 @@ function reconstructSolution(goalKey, parent){
 }
 
 function solveBFS(maxDepth){
-  const start = {
-    robots: cloneRobots(board.robots),
-    lastDir: Array(board.robots.length).fill(null),
-    hasTurn: Array(board.robots.length).fill(false),
-  };
-  const startKey = encodeSolverState(start);
-
-  const q = [];
-  const parent = new Map(); // key -> {p, m:{r,dir}}
-  const depth = new Map();
-
-  parent.set(startKey, null);
-  depth.set(startKey, 0);
-  q.push(start);
-
+  const numRobots = board.robots.length;
   const goalPos = board.goal.pos;
-  const goalRobot = board.goal.robot;
+  const goalRobot = board.goal.robot;     // -1 = mika tahansa robotti kelpaa
+  const trackAll = (goalRobot === -1);
 
-  const isSolvedNode = (node, d)=>{
+  const dirCode = (d) => (d===null ? 4 : DIR_IDX[d]); // 0..3 suunta, 4 = ei vielä liikkunut
+
+  // Avaimen koko biteissa: 8 bittia/robotti (sijainti) + 4 bittia per
+  // seurattu robotti (3 bittia suunta + 1 bitti "on kaantynyt"). Number on
+  // tarkka 53 bittiin asti - BigIntia kaytetaan vain jos se ei riita.
+  const historyRobots = trackAll ? numRobots : 1;
+  const useBigInt = (numRobots*8 + historyRobots*4) > 53;
+
+  function keyNum(robots, dirs, turns){
+    let k = 0;
+    for(let i=0;i<numRobots;i++) k = k*256 + robots[i];
+    if(trackAll){
+      for(let i=0;i<numRobots;i++) k = k*16 + (dirCode(dirs[i])*2 + (turns[i]?1:0));
+    } else {
+      k = k*16 + (dirCode(dirs[goalRobot])*2 + (turns[goalRobot]?1:0));
+    }
+    return k;
+  }
+  function keyBig(robots, dirs, turns){
+    let k = 0n;
+    for(let i=0;i<numRobots;i++) k = (k<<8n) | BigInt(robots[i]);
+    if(trackAll){
+      for(let i=0;i<numRobots;i++) k = (k<<4n) | BigInt(dirCode(dirs[i])*2 + (turns[i]?1:0));
+    } else {
+      k = (k<<4n) | BigInt(dirCode(dirs[goalRobot])*2 + (turns[goalRobot]?1:0));
+    }
+    return k;
+  }
+  const makeKey = useBigInt ? keyBig : keyNum;
+
+  function slidePos(robots, robo, dirIdx){
+    let pos = robots[robo];
+    const dx = DXY[dirIdx][0], dy = DXY[dirIdx][1];
+    const w = board.w;
+    const walls = board.walls[dirIdx];
+    while(true){
+      if(walls[pos]) break;
+      const x = pos % w, y = (pos/w)|0;
+      const npos = (x+dx) + (y+dy)*w;
+      let occupied = false;
+      for(let i=0;i<numRobots;i++){ if(i!==robo && robots[i]===npos){ occupied=true; break; } }
+      if(occupied) break;
+      pos = npos;
+    }
+    return pos;
+  }
+
+  const isSolvedNode = (robots, dirs, turns, d)=>{
     if(d < 2) return false;
-    const robots = node.robots;
-    if(goalRobot===-1){
-      for(let i=0;i<robots.length;i++){
-        if(robots[i]===goalPos) return !!node.hasTurn[i];
-      }
+    if(trackAll){
+      for(let i=0;i<numRobots;i++) if(robots[i]===goalPos) return !!turns[i];
       return false;
     }
-    return robots[goalRobot]===goalPos && !!node.hasTurn[goalRobot];
+    return robots[goalRobot]===goalPos && !!turns[goalRobot];
   };
 
-  while(q.length){
-    const cur = q.shift();
-    const curKey = encodeSolverState(cur);
-    const d = depth.get(curKey);
-    if(isSolvedNode(cur, d)) return reconstructSolution(curKey, parent);
+  const startRobots = cloneRobots(board.robots);
+  const startDirs = Array(numRobots).fill(null);
+  const startTurns = Array(numRobots).fill(false);
+  const startKey = makeKey(startRobots, startDirs, startTurns);
+
+  const visited = new Map();   // avain -> {p:edellinen avain, m:{r,dir}}
+  visited.set(startKey, null);
+
+  // Jono rinnakkaisina taulukoina + paaosoitin (ei shift()-kutsuja).
+  const qRobots=[startRobots], qDirs=[startDirs], qTurns=[startTurns];
+  const qDepth=[0], qKey=[startKey];
+  let head = 0;
+
+  while(head < qRobots.length){
+    const curRobots=qRobots[head], curDirs=qDirs[head], curTurns=qTurns[head];
+    const d=qDepth[head], curKey=qKey[head];
+    head++;
+
+    if(isSolvedNode(curRobots, curDirs, curTurns, d)) return reconstructSolution(curKey, visited);
     if(d>=maxDepth) continue;
 
-    for(let r=0;r<cur.robots.length;r++){
-      for(const dir of DIRS){
-        const nextRobots = cloneRobots(cur.robots);
-        if(!moveRobotStatic(board, nextRobots, r, dir)) continue;
+    for(let r=0;r<numRobots;r++){
+      for(let dirIdx=0; dirIdx<4; dirIdx++){
+        const newPos = slidePos(curRobots, r, dirIdx);
+        if(newPos === curRobots[r]) continue; // ei liiketta -> ei kannata jatkaa
 
-        const nextLastDir = cur.lastDir.slice();
-        const nextHasTurn = cur.hasTurn.slice();
-        const prev = nextLastDir[r];
-        if(prev && dir !== prev && !isOppositeDir(prev, dir)) nextHasTurn[r] = true;
-        nextLastDir[r] = dir;
+        const nextRobots = cloneRobots(curRobots);
+        nextRobots[r] = newPos;
 
-        const next = {
-          robots: nextRobots,
-          lastDir: nextLastDir,
-          hasTurn: nextHasTurn,
-        };
-        const nk = encodeSolverState(next);
-        if(parent.has(nk)) continue;
-        parent.set(nk, {p:curKey, m:{r,dir}});
-        depth.set(nk, d+1);
-        q.push(next);
+        let nextDirs, nextTurns;
+        const dirChar = DIRS[dirIdx];
+        if(trackAll || r===goalRobot){
+          nextDirs = curDirs.slice();
+          nextTurns = curTurns.slice();
+          const prev = nextDirs[r];
+          if(prev!==null && dirChar!==prev && !isOppositeDir(prev, dirChar)) nextTurns[r] = true;
+          nextDirs[r] = dirChar;
+        } else {
+          // Tämän robotin suunta/kulma-historia ei vaikuta maaliehtoon,
+          // joten samaa taulukkoa voi jakaa uudelleen kloonaamatta.
+          nextDirs = curDirs; nextTurns = curTurns;
+        }
+
+        const nk = makeKey(nextRobots, nextDirs, nextTurns);
+        if(visited.has(nk)) continue;
+        visited.set(nk, {p:curKey, m:{r, dir:dirChar}});
+        qRobots.push(nextRobots); qDirs.push(nextDirs); qTurns.push(nextTurns);
+        qDepth.push(d+1); qKey.push(nk);
       }
     }
   }
   return null;
 }
-
 document.getElementById("solveBtn").addEventListener("click", ()=>{
-  clearShownSolution();
+  solList.innerHTML="";
   const maxDepth = Math.max(1, Math.min(25, parseInt(document.getElementById("depthInp").value||"12",10)));
   setStatus("Haetaan ratkaisua…");
   setTimeout(()=>{
@@ -1128,8 +1141,6 @@ document.getElementById("solveBtn").addEventListener("click", ()=>{
       return;
     }
     setStatus("✅ Ratkaisu löytyi: " + res.length + " siirtoa");
-    shownSolutionStartRobots = new Int16Array(board.robots);
-    shownSolutionStartGoal = board.goal;
     solList.innerHTML="";
 res.forEach((m)=>{
   const li = document.createElement("li");
@@ -1258,7 +1269,7 @@ function rebuildBoardWithQuadrants(qPick){
   usedGoals.clear();
   if(board.goal) usedGoals.add(goalKey(board.goal));
   resetMoveHistory();
-  clearShownSolution();
+  solList.innerHTML = "";
   draw();
   refreshBuildUIFromBoard();
 }
@@ -1296,7 +1307,6 @@ if(goalSel){
     const g = board.goals[idx];
     if(g){
       board.goal = g;
-      clearShownSolution();
       draw();
     }
   });
@@ -1310,7 +1320,7 @@ if(startPlayBtn){
     usedGoals.clear();
     if(board.goal) usedGoals.add(goalKey(board.goal));
 	updateGoalInfo();
-    clearShownSolution();
+    solList.innerHTML = "";
     setBuildMode(false);
     setStatus("Peli aloitettu tästä asetelmasta.");
     draw();
@@ -1328,7 +1338,6 @@ function placeRobotAtCell(robo, x, y){
     if(i!==robo && board.robots[i]===pos) return false;
   }
   board.robots[robo] = pos;
-  clearShownSolution();
   draw();
   return true;
 }
