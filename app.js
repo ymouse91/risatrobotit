@@ -404,7 +404,7 @@ function labelForQuadrant(q){
 function goalLabel(g){
   const pos = `${g.x},${g.y}`;
   if(g.robot === -1) return `${g.shape} (mikä tahansa) @ ${pos}`;
-  return `${g.shape} / ${ROBOT_NAMES[g.robot]} @ ${pos}`;
+  return `${ROBOT_NAMES[g.robot]} / ${g.shape} @ ${pos}`;
 }
 
 
