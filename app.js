@@ -1132,12 +1132,12 @@ function solveBFS(maxDepth){
 }
 document.getElementById("solveBtn").addEventListener("click", ()=>{
   solList.innerHTML="";
-  const maxDepth = Math.max(1, Math.min(25, parseInt(document.getElementById("depthInp").value||"12",10)));
+  const maxDepth = Math.max(1, Math.min(25, parseInt(document.getElementById("depthInp").value||"16",10)));
   setStatus("Haetaan ratkaisua…");
   setTimeout(()=>{
     const res = solveBFS(maxDepth);
     if(!res){
-      setStatus("Ei ratkaisua syvyysrajalla.");
+      setStatus("Ei ratkaisua syvyysrajalla " + maxDepth + ".");
       return;
     }
     setStatus("✅ Ratkaisu löytyi: " + res.length + " siirtoa");
